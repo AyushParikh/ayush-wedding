@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0e0c0a" />
+  <title>RSVP — Ayush &amp; Nikita</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Hero ──────────────────────────────────────────────── -->
+  <section class="hero" id="hero">
+    <!-- Left: photo -->
+    <div class="hero-left">
+      <img src="hero.JPG" alt="Ayush and Nikita" class="hero-img" />
+      <div class="hero-overlay"></div>
+    </div>
+
+    <!-- Right: text panel (desktop only split) -->
+    <div class="hero-right">
+      <div class="hero-content">
+        <p class="hero-eyebrow">Together with their families</p>
+        <h1 class="hero-names">
+          <span class="first">Ayush</span>
+          <span class="hero-amp">&amp;</span>
+          <span>Nikita</span>
+        </h1>
+        <p class="hero-tagline">Request the honour of your presence</p>
+        <div class="hero-scroll" onclick="document.getElementById('rsvp-section').scrollIntoView({behavior:'smooth'})">↓</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RSVP Section ───────────────────────────────────────── -->
+  <div class="main-content" id="rsvp-section">
+    <div class="card">
+
+      <!-- Screen 1: Name Lookup -->
+      <div class="screen active" id="screen-lookup">
+        <h2 class="screen-title">Find Your Invitation</h2>
+        <div class="divider">✦</div>
+        <p class="screen-subtitle">Enter your name as it appears on your invitation.</p>
+
+        <div class="error-msg" id="lookup-error"></div>
+
+        <label for="first-name">First Name</label>
+        <input type="text" id="first-name" placeholder="e.g. Jane" autocomplete="given-name" />
+
+        <label for="last-name">Last Name</label>
+        <input type="text" id="last-name" placeholder="e.g. Doe" autocomplete="family-name" />
+
+        <button class="btn btn-primary" id="lookup-btn" onclick="lookupGuest()">
+          Find My Invitation
+        </button>
+      </div>
+
+      <!-- Screen 2: Event RSVP -->
+      <div class="screen" id="screen-rsvp">
+        <h2 class="screen-title">Your RSVP</h2>
+        <div class="divider">✦</div>
+        <p class="guest-greeting" id="guest-greeting"></p>
+        <p class="screen-subtitle">Please indicate your attendance for each celebration.</p>
+
+        <div class="error-msg" id="rsvp-error"></div>
+
+        <div class="events-list" id="events-list"></div>
+
+        <button class="btn btn-primary" id="submit-btn" onclick="submitRsvp()">
+          Submit RSVP
+        </button>
+        <br/>
+        <button class="btn btn-ghost" onclick="goBack()">← Back</button>
+      </div>
+
+      <!-- Screen 3: Confirmation -->
+      <div class="screen" id="screen-confirm">
+        <div class="confirmation-icon">✓</div>
+        <h2 class="confirmation-title">Thank You!</h2>
+        <p class="confirmation-msg">
+          Your RSVP has been received.<br/>
+          We can't wait to celebrate with you.
+        </p>
+
+        <div class="rsvp-summary">
+          <div id="summary-rows"></div>
+        </div>
+
+        <br/>
+        <button class="btn btn-ghost" style="width:100%;margin-top:1.2rem;" onclick="startOver()">Submit Another RSVP</button>
+      </div>
+
+    </div>
+
+    <footer>Ayush &amp; Nikita &nbsp;·&nbsp; 2026</footer>
+  </div>
+
+  <script>
+    let guestData = null;
+    const selections = {};
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function goBack() { showScreen('screen-lookup'); }
+
+    function startOver() {
+      document.getElementById('first-name').value = '';
+      document.getElementById('last-name').value = '';
+      document.getElementById('events-list').innerHTML = '';
+      document.getElementById('summary-rows').innerHTML = '';
+      Object.keys(selections).forEach(k => delete selections[k]);
+      guestData = null;
+      hideError('lookup-error');
+      hideError('rsvp-error');
+      showScreen('screen-lookup');
+    }
+
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    function hideError(id) {
+      const el = document.getElementById(id);
+      el.textContent = '';
+      el.classList.remove('visible');
+    }
+
+    function setLoading(btnId, loading) {
+      const btn = document.getElementById(btnId);
+      if (loading) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Please wait…';
+      } else {
+        btn.disabled = false;
+        btn.textContent = btnId === 'lookup-btn' ? 'Find My Invitation' : 'Submit RSVP';
+      }
+    }
+
+    async function lookupGuest() {
+      hideError('lookup-error');
+      const first = document.getElementById('first-name').value.trim();
+      const last  = document.getElementById('last-name').value.trim();
+
+      if (!first || !last) {
+        showError('lookup-error', 'Please enter both your first and last name.');
+        return;
+      }
+
+      setLoading('lookup-btn', true);
+      try {
+        const res  = await fetch(`/api/lookup?first=${encodeURIComponent(first)}&last=${encodeURIComponent(last)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Server error');
+
+        if (!data.found) {
+          showError('lookup-error', "We couldn't find your name on the guest list. Please check the spelling or contact us directly.");
+          return;
+        }
+
+        guestData = data;
+        buildRsvpScreen(data);
+        showScreen('screen-rsvp');
+      } catch (err) {
+        showError('lookup-error', 'Something went wrong. Please try again.');
+        console.error(err);
+      } finally {
+        setLoading('lookup-btn', false);
+      }
+    }
+
+    function buildRsvpScreen({ firstName, lastName, events }) {
+      document.getElementById('guest-greeting').textContent = `Welcome, ${firstName} ${lastName}!`;
+      Object.keys(selections).forEach(k => delete selections[k]);
+
+      const list = document.getElementById('events-list');
+      list.innerHTML = '';
+
+      events.forEach(event => {
+        selections[event] = null;
+        const card = document.createElement('div');
+        card.className = 'event-card';
+        card.innerHTML = `
+          <div class="event-name">${escHtml(event)}</div>
+          <div class="rsvp-options">
+            <button class="rsvp-btn" data-event="${escHtml(event)}" data-value="Attending"     onclick="selectRsvp(this)">Attending</button>
+            <button class="rsvp-btn" data-event="${escHtml(event)}" data-value="Not Attending" onclick="selectRsvp(this)">Not Attending</button>
+            <button class="rsvp-btn" data-event="${escHtml(event)}" data-value="Maybe"         onclick="selectRsvp(this)">Maybe</button>
+          </div>`;
+        list.appendChild(card);
+      });
+    }
+
+    function selectRsvp(btn) {
+      const event = btn.dataset.event;
+      const value = btn.dataset.value;
+      selections[event] = value;
+
+      btn.closest('.rsvp-options').querySelectorAll('.rsvp-btn').forEach(b =>
+        b.classList.remove('selected-attending', 'selected-not-attending', 'selected-maybe')
+      );
+
+      const cls = value === 'Attending'     ? 'selected-attending'
+                : value === 'Not Attending' ? 'selected-not-attending'
+                : 'selected-maybe';
+      btn.classList.add(cls);
+    }
+
+    async function submitRsvp() {
+      hideError('rsvp-error');
+
+      const unselected = Object.entries(selections).filter(([, v]) => v === null).map(([k]) => k);
+      if (unselected.length > 0) {
+        showError('rsvp-error', `Please select a response for: ${unselected.join(', ')}`);
+        return;
+      }
+
+      setLoading('submit-btn', true);
+      try {
+        const res  = await fetch('/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: guestData.firstName,
+            lastName:  guestData.lastName,
+            responses: selections,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Server error');
+
+        buildConfirmationScreen(selections);
+        showScreen('screen-confirm');
+      } catch (err) {
+        showError('rsvp-error', 'Failed to submit your RSVP. Please try again.');
+        console.error(err);
+      } finally {
+        setLoading('submit-btn', false);
+      }
+    }
+
+    function buildConfirmationScreen(responses) {
+      const container = document.getElementById('summary-rows');
+      container.innerHTML = '';
+      Object.entries(responses).forEach(([event, response]) => {
+        const div = document.createElement('div');
+        div.className = 'summary-row';
+        const cls = response.replace(/\s+/g, '-');
+        div.innerHTML = `
+          <span class="summary-event">${escHtml(event)}</span>
+          <span class="summary-response ${cls}">${escHtml(response)}</span>`;
+        container.appendChild(div);
+      });
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    document.getElementById('first-name').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('last-name').focus();
+    });
+    document.getElementById('last-name').addEventListener('keydown', e => {
+      if (e.key === 'Enter') lookupGuest();
+    });
+  </script>
+</body>
+</html>

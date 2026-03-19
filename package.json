@@ -1,0 +1,12 @@
+{
+  "name": "wedding-rsvp",
+  "version": "1.0.0",
+  "description": "Wedding RSVP for Ayush & Nikita",
+  "private": true,
+  "dependencies": {
+    "googleapis": "^144.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
