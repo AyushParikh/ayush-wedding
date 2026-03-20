@@ -91,6 +91,7 @@
 
   <script>
     let guestData = null;
+    let guestCode = null;
     let guestLimit = null;
     const selections = {};
     const counts = {};
@@ -154,6 +155,7 @@
           return;
         }
         guestData = data;
+        guestCode = code;
         guestLimit = data.limit || null;
         buildRsvpScreen(data);
         showScreen('screen-rsvp');
@@ -206,6 +208,8 @@
       const cls = value === 'Attending' ? 'selected-attending' : 'selected-not-attending';
       btn.classList.add(cls);
 
+      counts[event] = value === 'Attending' ? (counts[event] || 1) : 0;
+
       // show/hide guest count stepper
       const eid = 'count-' + event.replace(/\s+/g, '-');
       const countEl = document.getElementById(eid);
@@ -234,6 +238,7 @@
           body: JSON.stringify({
             firstName: guestData.firstName,
             lastName:  guestData.lastName,
+            code:      guestCode,
             responses: selections,
             counts,
           }),

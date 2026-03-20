@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { firstName, lastName, responses, counts } = req.body || {};
+  const { firstName, lastName, code, responses, counts } = req.body || {};
 
   if (!firstName || !lastName || !responses || typeof responses !== 'object') {
     return res.status(400).json({ error: 'firstName, lastName, and responses are required' });
@@ -31,22 +31,38 @@ module.exports = async (req, res) => {
     const sheetName = process.env.RESPONSE_SHEET_NAME || 'Responses';
     const timestamp = new Date().toISOString();
 
-    const rows = Object.entries(responses).map(([event, response]) => [
+    // Read existing rows
+    const existing = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: sheetName });
+    const allRows = existing.data.values || [];
+
+    // Remove previous rows for this code (column index 3)
+    const codeLower = (code || '').trim().toLowerCase();
+    const kept = codeLower
+      ? allRows.filter(row => (row[3] || '').trim().toLowerCase() !== codeLower)
+      : allRows;
+
+    // Build new rows with code in column D
+    const newRows = Object.entries(responses).map(([event, response]) => [
       timestamp,
       firstName.trim(),
       lastName.trim(),
+      (code || '').trim(),
       event,
       response,
-      (counts && counts[event]) ? Number(counts[event]) : '',
+      (counts && counts[event] != null) ? Number(counts[event]) : '',
     ]);
 
-    await sheets.spreadsheets.values.append({
-      spreadsheetId: sheetId,
-      range: sheetName,
-      valueInputOption: 'USER_ENTERED',
-      insertDataOption: 'INSERT_ROWS',
-      requestBody: { values: rows },
-    });
+    // Clear and rewrite
+    await sheets.spreadsheets.values.clear({ spreadsheetId: sheetId, range: sheetName });
+    const allNewRows = [...kept, ...newRows];
+    if (allNewRows.length > 0) {
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: sheetId,
+        range: sheetName,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: allNewRows },
+      });
+    }
 
     return res.status(200).json({ success: true });
   } catch (err) {
