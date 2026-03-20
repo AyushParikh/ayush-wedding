@@ -218,7 +218,7 @@
 
     function changeCount(event, delta) {
       const max = guestLimit || Infinity;
-      counts[event] = Math.min(max, Math.max(1, (counts[event] || 1) + delta));
+      counts[event] = Math.min(max, Math.max(0, (counts[event] || 1) + delta));
       const el = document.getElementById('val-count-' + event.replace(/\s+/g, '-'));
       if (el) el.textContent = counts[event];
     }
@@ -228,6 +228,11 @@
       const unselected = Object.entries(selections).filter(([, v]) => v === null).map(([k]) => k);
       if (unselected.length > 0) {
         showError('rsvp-error', `Please select a response for: ${unselected.join(', ')}`);
+        return;
+      }
+      const zeroCount = Object.entries(selections).filter(([k, v]) => v === 'Attending' && (counts[k] || 0) === 0).map(([k]) => k);
+      if (zeroCount.length > 0) {
+        showError('rsvp-error', `Please specify the number of guests for: ${zeroCount.join(', ')}`);
         return;
       }
       setLoading('submit-btn', true);
