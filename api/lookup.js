@@ -16,9 +16,9 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { first, last } = req.query;
-  if (!first || !last) {
-    return res.status(400).json({ error: 'first and last query params are required' });
+  const { code } = req.query;
+  if (!code) {
+    return res.status(400).json({ error: 'code query param is required' });
   }
 
   try {
@@ -39,32 +39,28 @@ module.exports = async (req, res) => {
     }
 
     const headers = rows[0];
+    const skipCols = new Set(['limit', 'code']);
 
-    // Find optional "Limit" column (case-insensitive), everything else after col 1 is an event
+    const codeColIndex = headers.findIndex(h => h.trim().toLowerCase() === 'code');
     const limitColIndex = headers.findIndex(h => h.trim().toLowerCase() === 'limit');
-    const eventHeaders = headers.slice(2).filter(h => h.trim().toLowerCase() !== 'limit');
 
-    const firstLower = first.trim().toLowerCase();
-    const lastLower = last.trim().toLowerCase();
-
-    const matches = rows.slice(1).filter(row => {
-      return (
-        (row[0] || '').trim().toLowerCase() === firstLower &&
-        (row[1] || '').trim().toLowerCase() === lastLower
-      );
+    const codeLower = code.trim().toLowerCase();
+    console.log('looking for code:', codeLower, 'codeColIndex:', codeColIndex);
+    const guestRow = rows.slice(1).find(row => {
+      const stored = (row[codeColIndex] || '').trim().toLowerCase();
+      console.log('stored code:', stored);
+      return stored === codeLower;
     });
 
-    if (matches.length === 0) {
+    if (!guestRow) {
       return res.status(200).json({ found: false });
     }
 
-    const guestRow = matches[0];
     const truthy = new Set(['yes', 'y', '1', 'true']);
 
-    // Re-map event columns skipping the Limit column
     const events = headers.slice(2)
       .map((header, i) => ({ header, val: (guestRow[i + 2] || '').trim().toLowerCase() }))
-      .filter(({ header, val }) => header.trim().toLowerCase() !== 'limit' && truthy.has(val))
+      .filter(({ header, val }) => !skipCols.has(header.trim().toLowerCase()) && truthy.has(val))
       .map(({ header }) => header.trim());
 
     const limit = limitColIndex >= 0

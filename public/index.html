@@ -37,16 +37,14 @@
         <!-- RSVP Card -->
         <div class="card">
 
-          <!-- Screen 1: Name Lookup -->
+          <!-- Screen 1: Code Lookup -->
           <div class="screen active" id="screen-lookup">
             <h2 class="screen-title">Find Your Invitation</h2>
             <div class="screen-title-rule"></div>
-            <p class="screen-subtitle">Enter your name to find your invitation.</p>
+            <p class="screen-subtitle">Enter the invitation code from your invitation.</p>
             <div class="error-msg" id="lookup-error"></div>
-            <label for="first-name">First Name</label>
-            <input type="text" id="first-name" placeholder="e.g. Jane" autocomplete="given-name" />
-            <label for="last-name">Last Name</label>
-            <input type="text" id="last-name" placeholder="e.g. Doe" autocomplete="family-name" />
+            <label for="invitation-code">Invitation Code</label>
+            <input type="text" id="invitation-code" placeholder="e.g. XK7R2" autocomplete="off" style="text-transform:uppercase" />
             <button class="btn btn-primary" id="lookup-btn" onclick="lookupGuest()">Find My Invitation</button>
           </div>
 
@@ -101,8 +99,7 @@
     function goBack() { showScreen('screen-lookup'); }
 
     function startOver() {
-      document.getElementById('first-name').value = '';
-      document.getElementById('last-name').value = '';
+      document.getElementById('invitation-code').value = '';
       document.getElementById('events-list').innerHTML = '';
       document.getElementById('summary-rows').innerHTML = '';
       Object.keys(selections).forEach(k => delete selections[k]);
@@ -138,19 +135,18 @@
 
     async function lookupGuest() {
       hideError('lookup-error');
-      const first = document.getElementById('first-name').value.trim();
-      const last  = document.getElementById('last-name').value.trim();
-      if (!first || !last) {
-        showError('lookup-error', 'Please enter both your first and last name.');
+      const code = document.getElementById('invitation-code').value.trim();
+      if (!code) {
+        showError('lookup-error', 'Please enter your invitation code.');
         return;
       }
       setLoading('lookup-btn', true);
       try {
-        const res  = await fetch(`/api/lookup?first=${encodeURIComponent(first)}&last=${encodeURIComponent(last)}`);
+        const res  = await fetch(`/api/lookup?code=${encodeURIComponent(code)}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Server error');
         if (!data.found) {
-          showError('lookup-error', "We couldn't find your name on the guest list. Please check the spelling or contact us directly.");
+          showError('lookup-error', "We couldn't find an invitation matching that code. Please check the code or contact us directly.");
           return;
         }
         guestData = data;
@@ -277,10 +273,7 @@
         .replace(/"/g, '&quot;');
     }
 
-    document.getElementById('first-name').addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('last-name').focus();
-    });
-    document.getElementById('last-name').addEventListener('keydown', e => {
+    document.getElementById('invitation-code').addEventListener('keydown', e => {
       if (e.key === 'Enter') lookupGuest();
     });
   </script>
