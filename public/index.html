@@ -282,6 +282,14 @@
       if (e.key === 'Enter') lookupGuest();
     });
 
+    // Auto-lookup from ?code= query param
+    const urlCode = new URLSearchParams(window.location.search).get('code');
+    if (urlCode) {
+      document.getElementById('invitation-code').value = urlCode;
+      history.replaceState(null, '', window.location.pathname);
+      lookupGuest();
+    }
+
     // Heart cursor trail
     let lastHeart = 0;
     document.addEventListener('mousemove', e => {
