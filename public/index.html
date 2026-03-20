@@ -175,7 +175,7 @@
       list.innerHTML = '';
       events.forEach(({ name, date, time }) => {
         selections[name] = null;
-        counts[name] = 1;
+        counts[name] = 0;
         const card = document.createElement('div');
         card.className = 'event-card';
         const eid = 'count-' + name.replace(/\s+/g, '-');
@@ -190,7 +190,7 @@
             <span class="count-label">How many guests?${guestLimit ? `<span class="count-max"> (max ${guestLimit})</span>` : ''}</span>
             <div class="stepper">
               <button class="step-btn" onclick="changeCount('${escHtml(name)}', -1)">−</button>
-              <span class="step-val" id="val-count-${name.replace(/\s+/g, '-')}">1</span>
+              <span class="step-val" id="val-count-${name.replace(/\s+/g, '-')}">0</span>
               <button class="step-btn" onclick="changeCount('${escHtml(name)}', 1)">+</button>
             </div>
           </div>`;
@@ -208,7 +208,7 @@
       const cls = value === 'Attending' ? 'selected-attending' : 'selected-not-attending';
       btn.classList.add(cls);
 
-      counts[event] = value === 'Attending' ? (counts[event] || 1) : 0;
+      counts[event] = value === 'Attending' ? (counts[event] || 0) : 0;
 
       // show/hide guest count stepper
       const eid = 'count-' + event.replace(/\s+/g, '-');
@@ -218,7 +218,7 @@
 
     function changeCount(event, delta) {
       const max = guestLimit || Infinity;
-      counts[event] = Math.min(max, Math.max(0, (counts[event] || 1) + delta));
+      counts[event] = Math.min(max, Math.max(0, (counts[event] ?? 0) + delta));
       const el = document.getElementById('val-count-' + event.replace(/\s+/g, '-'));
       if (el) el.textContent = counts[event];
     }
