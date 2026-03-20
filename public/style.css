@@ -373,16 +373,16 @@ input[type="text"]:focus {
 
 .rsvp-options {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.4rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
 }
 
 .rsvp-btn {
-  padding: 0.5rem 0.3rem;
+  padding: 0.75rem 0.5rem;
   font-family: 'Nunito', sans-serif;
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 500;
-  letter-spacing: 0.12rem;
+  letter-spacing: 0.14rem;
   text-transform: uppercase;
   border: 1px solid rgba(201,169,110,0.2);
   border-radius: 1px;
@@ -395,6 +395,69 @@ input[type="text"]:focus {
 }
 .rsvp-btn:hover { border-color: var(--gold); color: var(--gold-lt); }
 
+/* ── Guest count stepper ─────────────────────────────────── */
+.guest-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.8rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(201,169,110,0.12);
+}
+
+.count-label {
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.12rem;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.count-max {
+  color: rgba(201,169,110,0.55);
+  letter-spacing: 0.05rem;
+  text-transform: none;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid rgba(201,169,110,0.25);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.step-btn {
+  background: var(--surface2);
+  border: none;
+  color: var(--gold);
+  width: 30px;
+  height: 28px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-appearance: none;
+}
+.step-btn:hover { background: rgba(201,169,110,0.12); }
+.step-btn:active { background: rgba(201,169,110,0.2); }
+
+.step-val {
+  min-width: 32px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--cream);
+  background: var(--surface);
+  height: 28px;
+  line-height: 28px;
+  border-left: 1px solid rgba(201,169,110,0.2);
+  border-right: 1px solid rgba(201,169,110,0.2);
+}
+
 .rsvp-btn.selected-attending {
   background: rgba(122,158,138,0.2);
   border-color: var(--sage);
@@ -404,11 +467,6 @@ input[type="text"]:focus {
   background: rgba(196,144,138,0.15);
   border-color: var(--rose);
   color: #d4a8a3;
-}
-.rsvp-btn.selected-maybe {
-  background: rgba(201,169,110,0.12);
-  border-color: var(--gold);
-  color: var(--gold-lt);
 }
 
 /* ── Confirmation ────────────────────────────────────────── */
@@ -455,7 +513,9 @@ input[type="text"]:focus {
   border-bottom: 1px solid rgba(201,169,110,0.08);
 }
 .summary-event { color: var(--text); }
+.summary-right { display: flex; align-items: center; gap: 0.6rem; }
 .summary-response { font-weight: 400; }
+.summary-count { font-size: 0.72rem; color: var(--muted); }
 .summary-response.Attending     { color: #a8d4bc; }
 .summary-response.Not-Attending { color: #d4a8a3; }
 .summary-response.Maybe         { color: var(--gold-lt); }

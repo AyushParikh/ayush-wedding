@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { firstName, lastName, responses } = req.body || {};
+  const { firstName, lastName, responses, counts } = req.body || {};
 
   if (!firstName || !lastName || !responses || typeof responses !== 'object') {
     return res.status(400).json({ error: 'firstName, lastName, and responses are required' });
@@ -37,6 +37,7 @@ module.exports = async (req, res) => {
       lastName.trim(),
       event,
       response,
+      (counts && counts[event]) ? Number(counts[event]) : '',
     ]);
 
     await sheets.spreadsheets.values.append({

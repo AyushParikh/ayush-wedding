@@ -39,8 +39,10 @@ module.exports = async (req, res) => {
     }
 
     const headers = rows[0];
-    // First two columns are First Name, Last Name; rest are event columns
-    const eventHeaders = headers.slice(2);
+
+    // Find optional "Limit" column (case-insensitive), everything else after col 1 is an event
+    const limitColIndex = headers.findIndex(h => h.trim().toLowerCase() === 'limit');
+    const eventHeaders = headers.slice(2).filter(h => h.trim().toLowerCase() !== 'limit');
 
     const firstLower = first.trim().toLowerCase();
     const lastLower = last.trim().toLowerCase();
@@ -59,16 +61,22 @@ module.exports = async (req, res) => {
     const guestRow = matches[0];
     const truthy = new Set(['yes', 'y', '1', 'true']);
 
-    const events = eventHeaders.filter((event, i) => {
-      const val = (guestRow[i + 2] || '').trim().toLowerCase();
-      return truthy.has(val);
-    });
+    // Re-map event columns skipping the Limit column
+    const events = headers.slice(2)
+      .map((header, i) => ({ header, val: (guestRow[i + 2] || '').trim().toLowerCase() }))
+      .filter(({ header, val }) => header.trim().toLowerCase() !== 'limit' && truthy.has(val))
+      .map(({ header }) => header.trim());
+
+    const limit = limitColIndex >= 0
+      ? parseInt(guestRow[limitColIndex] || '0', 10) || null
+      : null;
 
     return res.status(200).json({
       found: true,
       firstName: guestRow[0].trim(),
       lastName: guestRow[1].trim(),
       events,
+      limit,
     });
   } catch (err) {
     console.error('lookup error:', err);

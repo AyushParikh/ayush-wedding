@@ -89,7 +89,9 @@
 
   <script>
     let guestData = null;
+    let guestLimit = null;
     const selections = {};
+    const counts = {};
 
     function showScreen(id) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -104,6 +106,7 @@
       document.getElementById('events-list').innerHTML = '';
       document.getElementById('summary-rows').innerHTML = '';
       Object.keys(selections).forEach(k => delete selections[k]);
+      Object.keys(counts).forEach(k => delete counts[k]);
       guestData = null;
       hideError('lookup-error');
       hideError('rsvp-error');
@@ -151,6 +154,7 @@
           return;
         }
         guestData = data;
+        guestLimit = data.limit || null;
         buildRsvpScreen(data);
         showScreen('screen-rsvp');
       } catch (err) {
@@ -164,18 +168,28 @@
     function buildRsvpScreen({ firstName, lastName, events }) {
       document.getElementById('guest-greeting').textContent = `Welcome, ${firstName} ${lastName}!`;
       Object.keys(selections).forEach(k => delete selections[k]);
+      Object.keys(counts).forEach(k => delete counts[k]);
       const list = document.getElementById('events-list');
       list.innerHTML = '';
       events.forEach(event => {
         selections[event] = null;
+        counts[event] = 1;
         const card = document.createElement('div');
         card.className = 'event-card';
+        const eid = 'count-' + event.replace(/\s+/g, '-');
         card.innerHTML = `
           <div class="event-name">${escHtml(event)}</div>
           <div class="rsvp-options">
             <button class="rsvp-btn" data-event="${escHtml(event)}" data-value="Attending"     onclick="selectRsvp(this)">Attending</button>
             <button class="rsvp-btn" data-event="${escHtml(event)}" data-value="Not Attending" onclick="selectRsvp(this)">Not Attending</button>
-            <button class="rsvp-btn" data-event="${escHtml(event)}" data-value="Maybe"         onclick="selectRsvp(this)">Maybe</button>
+          </div>
+          <div class="guest-count" id="${eid}" style="display:none">
+            <span class="count-label">How many guests?${guestLimit ? `<span class="count-max"> (max ${guestLimit})</span>` : ''}</span>
+            <div class="stepper">
+              <button class="step-btn" onclick="changeCount('${escHtml(event)}', -1)">−</button>
+              <span class="step-val" id="val-count-${event.replace(/\s+/g, '-')}">1</span>
+              <button class="step-btn" onclick="changeCount('${escHtml(event)}', 1)">+</button>
+            </div>
           </div>`;
         list.appendChild(card);
       });
@@ -188,10 +202,20 @@
       btn.closest('.rsvp-options').querySelectorAll('.rsvp-btn').forEach(b =>
         b.classList.remove('selected-attending', 'selected-not-attending', 'selected-maybe')
       );
-      const cls = value === 'Attending'     ? 'selected-attending'
-                : value === 'Not Attending' ? 'selected-not-attending'
-                : 'selected-maybe';
+      const cls = value === 'Attending' ? 'selected-attending' : 'selected-not-attending';
       btn.classList.add(cls);
+
+      // show/hide guest count stepper
+      const eid = 'count-' + event.replace(/\s+/g, '-');
+      const countEl = document.getElementById(eid);
+      if (countEl) countEl.style.display = value === 'Attending' ? 'flex' : 'none';
+    }
+
+    function changeCount(event, delta) {
+      const max = guestLimit || Infinity;
+      counts[event] = Math.min(max, Math.max(1, (counts[event] || 1) + delta));
+      const el = document.getElementById('val-count-' + event.replace(/\s+/g, '-'));
+      if (el) el.textContent = counts[event];
     }
 
     async function submitRsvp() {
@@ -210,6 +234,7 @@
             firstName: guestData.firstName,
             lastName:  guestData.lastName,
             responses: selections,
+            counts,
           }),
         });
         const data = await res.json();
@@ -231,9 +256,15 @@
         const div = document.createElement('div');
         div.className = 'summary-row';
         const cls = response.replace(/\s+/g, '-');
+        const countStr = response !== 'Not Attending' && counts[event]
+          ? `<span class="summary-count">${counts[event]} guest${counts[event] > 1 ? 's' : ''}</span>`
+          : '';
         div.innerHTML = `
           <span class="summary-event">${escHtml(event)}</span>
-          <span class="summary-response ${cls}">${escHtml(response)}</span>`;
+          <span class="summary-right">
+            <span class="summary-response ${cls}">${escHtml(response)}</span>
+            ${countStr}
+          </span>`;
         container.appendChild(div);
       });
     }
