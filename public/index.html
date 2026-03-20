@@ -9,91 +9,80 @@
 </head>
 <body>
 
-  <!-- ── Hero ──────────────────────────────────────────────── -->
-  <section class="hero" id="hero">
-    <!-- Left: photo -->
-    <div class="hero-left">
+  <div class="layout">
+
+    <!-- ── Left: Photo ───────────────────────────────────────── -->
+    <div class="layout-photo">
       <img src="hero.JPG" alt="Ayush and Nikita" class="hero-img" />
       <div class="hero-overlay"></div>
     </div>
 
-    <!-- Right: text panel (desktop only split) -->
-    <div class="hero-right">
-      <div class="hero-content">
-        <p class="hero-eyebrow">Together with their families</p>
-        <h1 class="hero-names">
-          <span class="first">Ayush</span>
-          <span class="hero-amp">&amp;</span>
-          <span>Nikita</span>
-        </h1>
-        <p class="hero-tagline">Request the honour of your presence</p>
-        <div class="hero-scroll" onclick="document.getElementById('rsvp-section').scrollIntoView({behavior:'smooth'})">↓</div>
-      </div>
-    </div>
-  </section>
+    <!-- ── Right: Names + Form ───────────────────────────────── -->
+    <div class="layout-panel">
 
-  <!-- ── RSVP Section ───────────────────────────────────────── -->
-  <div class="main-content" id="rsvp-section">
-    <div class="card">
+      <div class="panel-inner">
 
-      <!-- Screen 1: Name Lookup -->
-      <div class="screen active" id="screen-lookup">
-        <h2 class="screen-title">Find Your Invitation</h2>
-        <div class="divider">✦</div>
-        <p class="screen-subtitle">Enter your name as it appears on your invitation.</p>
-
-        <div class="error-msg" id="lookup-error"></div>
-
-        <label for="first-name">First Name</label>
-        <input type="text" id="first-name" placeholder="e.g. Jane" autocomplete="given-name" />
-
-        <label for="last-name">Last Name</label>
-        <input type="text" id="last-name" placeholder="e.g. Doe" autocomplete="family-name" />
-
-        <button class="btn btn-primary" id="lookup-btn" onclick="lookupGuest()">
-          Find My Invitation
-        </button>
-      </div>
-
-      <!-- Screen 2: Event RSVP -->
-      <div class="screen" id="screen-rsvp">
-        <h2 class="screen-title">Your RSVP</h2>
-        <div class="divider">✦</div>
-        <p class="guest-greeting" id="guest-greeting"></p>
-        <p class="screen-subtitle">Please indicate your attendance for each celebration.</p>
-
-        <div class="error-msg" id="rsvp-error"></div>
-
-        <div class="events-list" id="events-list"></div>
-
-        <button class="btn btn-primary" id="submit-btn" onclick="submitRsvp()">
-          Submit RSVP
-        </button>
-        <br/>
-        <button class="btn btn-ghost" onclick="goBack()">← Back</button>
-      </div>
-
-      <!-- Screen 3: Confirmation -->
-      <div class="screen" id="screen-confirm">
-        <div class="confirmation-icon">✓</div>
-        <h2 class="confirmation-title">Thank You!</h2>
-        <p class="confirmation-msg">
-          Your RSVP has been received.<br/>
-          We can't wait to celebrate with you.
-        </p>
-
-        <div class="rsvp-summary">
-          <div id="summary-rows"></div>
+        <!-- Couple heading -->
+        <div class="panel-heading">
+          <p class="hero-eyebrow">Together with their families</p>
+          <h1 class="hero-names">
+            <span class="first">Ayush</span>
+            <span class="hero-amp">&amp;</span>
+            <span>Nikita</span>
+          </h1>
+          <div class="heading-divider">✦</div>
         </div>
 
-        <br/>
-        <button class="btn btn-ghost" style="width:100%;margin-top:1.2rem;" onclick="startOver()">Submit Another RSVP</button>
-      </div>
+        <!-- RSVP Card -->
+        <div class="card">
 
-    </div>
+          <!-- Screen 1: Name Lookup -->
+          <div class="screen active" id="screen-lookup">
+            <h2 class="screen-title">Find Your Invitation</h2>
+            <p class="screen-subtitle">Enter your name as it appears on your invitation.</p>
+            <div class="error-msg" id="lookup-error"></div>
+            <label for="first-name">First Name</label>
+            <input type="text" id="first-name" placeholder="e.g. Jane" autocomplete="given-name" />
+            <label for="last-name">Last Name</label>
+            <input type="text" id="last-name" placeholder="e.g. Doe" autocomplete="family-name" />
+            <button class="btn btn-primary" id="lookup-btn" onclick="lookupGuest()">Find My Invitation</button>
+          </div>
 
-    <footer>Ayush &amp; Nikita &nbsp;·&nbsp; 2026</footer>
-  </div>
+          <!-- Screen 2: Event RSVP -->
+          <div class="screen" id="screen-rsvp">
+            <h2 class="screen-title">Your RSVP</h2>
+            <p class="guest-greeting" id="guest-greeting"></p>
+            <p class="screen-subtitle">Please indicate your attendance for each celebration.</p>
+            <div class="error-msg" id="rsvp-error"></div>
+            <div class="events-list" id="events-list"></div>
+            <button class="btn btn-primary" id="submit-btn" onclick="submitRsvp()">Submit RSVP</button>
+            <br/>
+            <button class="btn btn-ghost" onclick="goBack()">← Back</button>
+          </div>
+
+          <!-- Screen 3: Confirmation -->
+          <div class="screen" id="screen-confirm">
+            <div class="confirmation-icon">✓</div>
+            <h2 class="confirmation-title">Thank You!</h2>
+            <p class="confirmation-msg">
+              Your RSVP has been received.<br/>
+              We can't wait to celebrate with you.
+            </p>
+            <div class="rsvp-summary">
+              <div id="summary-rows"></div>
+            </div>
+            <br/>
+            <button class="btn btn-ghost" style="width:100%;margin-top:1rem;" onclick="startOver()">Submit Another RSVP</button>
+          </div>
+
+        </div><!-- /card -->
+
+        <footer>Ayush &amp; Nikita &nbsp;·&nbsp; 2026</footer>
+
+      </div><!-- /panel-inner -->
+    </div><!-- /layout-panel -->
+
+  </div><!-- /layout -->
 
   <script>
     let guestData = null;
@@ -145,23 +134,19 @@
       hideError('lookup-error');
       const first = document.getElementById('first-name').value.trim();
       const last  = document.getElementById('last-name').value.trim();
-
       if (!first || !last) {
         showError('lookup-error', 'Please enter both your first and last name.');
         return;
       }
-
       setLoading('lookup-btn', true);
       try {
         const res  = await fetch(`/api/lookup?first=${encodeURIComponent(first)}&last=${encodeURIComponent(last)}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Server error');
-
         if (!data.found) {
           showError('lookup-error', "We couldn't find your name on the guest list. Please check the spelling or contact us directly.");
           return;
         }
-
         guestData = data;
         buildRsvpScreen(data);
         showScreen('screen-rsvp');
@@ -176,10 +161,8 @@
     function buildRsvpScreen({ firstName, lastName, events }) {
       document.getElementById('guest-greeting').textContent = `Welcome, ${firstName} ${lastName}!`;
       Object.keys(selections).forEach(k => delete selections[k]);
-
       const list = document.getElementById('events-list');
       list.innerHTML = '';
-
       events.forEach(event => {
         selections[event] = null;
         const card = document.createElement('div');
@@ -199,11 +182,9 @@
       const event = btn.dataset.event;
       const value = btn.dataset.value;
       selections[event] = value;
-
       btn.closest('.rsvp-options').querySelectorAll('.rsvp-btn').forEach(b =>
         b.classList.remove('selected-attending', 'selected-not-attending', 'selected-maybe')
       );
-
       const cls = value === 'Attending'     ? 'selected-attending'
                 : value === 'Not Attending' ? 'selected-not-attending'
                 : 'selected-maybe';
@@ -212,13 +193,11 @@
 
     async function submitRsvp() {
       hideError('rsvp-error');
-
       const unselected = Object.entries(selections).filter(([, v]) => v === null).map(([k]) => k);
       if (unselected.length > 0) {
         showError('rsvp-error', `Please select a response for: ${unselected.join(', ')}`);
         return;
       }
-
       setLoading('submit-btn', true);
       try {
         const res  = await fetch('/api/submit', {
@@ -232,7 +211,6 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Server error');
-
         buildConfirmationScreen(selections);
         showScreen('screen-confirm');
       } catch (err) {
