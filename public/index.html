@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0e0c0a" />
   <title>RSVP — Ayush &amp; Nikita</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="icon" href="/favicon.ico" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -167,24 +171,25 @@
       Object.keys(counts).forEach(k => delete counts[k]);
       const list = document.getElementById('events-list');
       list.innerHTML = '';
-      events.forEach(event => {
-        selections[event] = null;
-        counts[event] = 1;
+      events.forEach(({ name, date, time }) => {
+        selections[name] = null;
+        counts[name] = 1;
         const card = document.createElement('div');
         card.className = 'event-card';
-        const eid = 'count-' + event.replace(/\s+/g, '-');
+        const eid = 'count-' + name.replace(/\s+/g, '-');
         card.innerHTML = `
-          <div class="event-name">${escHtml(event)}</div>
+          <div class="event-name">${escHtml(name)}</div>
+          ${date ? `<div class="event-date">${escHtml(date)}${time ? `<span class="event-time">${escHtml(time.replace('-', ' – '))}</span>` : ''}</div>` : ''}
           <div class="rsvp-options">
-            <button class="rsvp-btn" data-event="${escHtml(event)}" data-value="Attending"     onclick="selectRsvp(this)">Attending</button>
-            <button class="rsvp-btn" data-event="${escHtml(event)}" data-value="Not Attending" onclick="selectRsvp(this)">Not Attending</button>
+            <button class="rsvp-btn" data-event="${escHtml(name)}" data-value="Attending"     onclick="selectRsvp(this)">Attending</button>
+            <button class="rsvp-btn" data-event="${escHtml(name)}" data-value="Not Attending" onclick="selectRsvp(this)">Not Attending</button>
           </div>
           <div class="guest-count" id="${eid}" style="display:none">
             <span class="count-label">How many guests?${guestLimit ? `<span class="count-max"> (max ${guestLimit})</span>` : ''}</span>
             <div class="stepper">
-              <button class="step-btn" onclick="changeCount('${escHtml(event)}', -1)">−</button>
-              <span class="step-val" id="val-count-${event.replace(/\s+/g, '-')}">1</span>
-              <button class="step-btn" onclick="changeCount('${escHtml(event)}', 1)">+</button>
+              <button class="step-btn" onclick="changeCount('${escHtml(name)}', -1)">−</button>
+              <span class="step-val" id="val-count-${name.replace(/\s+/g, '-')}">1</span>
+              <button class="step-btn" onclick="changeCount('${escHtml(name)}', 1)">+</button>
             </div>
           </div>`;
         list.appendChild(card);
@@ -275,6 +280,34 @@
 
     document.getElementById('invitation-code').addEventListener('keydown', e => {
       if (e.key === 'Enter') lookupGuest();
+    });
+
+    // Heart cursor trail
+    let lastHeart = 0;
+    document.addEventListener('mousemove', e => {
+      const now = Date.now();
+      if (now - lastHeart < 40) return;
+      lastHeart = now;
+      const heart = document.createElement('span');
+      heart.textContent = '♥';
+      heart.style.cssText = `
+        position: fixed;
+        left: ${e.clientX}px;
+        top: ${e.clientY}px;
+        pointer-events: none;
+        font-size: ${10 + Math.random() * 10}px;
+        color: #e03c3c;
+        opacity: 0.85;
+        transform: translate(-50%, -50%);
+        transition: opacity 1s ease, transform 1s ease;
+        z-index: 9999;
+      `;
+      document.body.appendChild(heart);
+      requestAnimationFrame(() => {
+        heart.style.opacity = '0';
+        heart.style.transform = `translate(-50%, -180%) scale(0.4)`;
+      });
+      setTimeout(() => heart.remove(), 1000);
     });
   </script>
 </body>

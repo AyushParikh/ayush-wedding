@@ -370,6 +370,23 @@ input[type="text"]:focus {
   color: var(--cream);
   margin-bottom: 0.7rem;
 }
+.event-date {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  color: var(--gold);
+  opacity: 0.8;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  margin-top: 0.1rem;
+  margin-bottom: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.event-time {
+  font-size: 0.73rem;
+  opacity: 0.65;
+}
 
 .rsvp-options {
   display: grid;

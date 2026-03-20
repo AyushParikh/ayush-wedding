@@ -61,7 +61,18 @@ module.exports = async (req, res) => {
     const events = headers.slice(2)
       .map((header, i) => ({ header, val: (guestRow[i + 2] || '').trim().toLowerCase() }))
       .filter(({ header, val }) => !skipCols.has(header.trim().toLowerCase()) && truthy.has(val))
-      .map(({ header }) => header.trim());
+      .map(({ header }) => {
+        const h = header.trim();
+        const colonIdx = h.indexOf(':');
+        if (colonIdx < 0) return { name: h, date: null, time: null };
+        const name = h.slice(0, colonIdx).trim();
+        const rest = h.slice(colonIdx + 1).trim();
+        // rest format: "DayOfWeek, Month Day, Year:TimeRange"
+        const m = rest.match(/^(.*\d{4}):(.*)$/);
+        return m
+          ? { name, date: m[1].trim(), time: m[2].trim() }
+          : { name, date: rest, time: null };
+      });
 
     const limit = limitColIndex >= 0
       ? parseInt(guestRow[limitColIndex] || '0', 10) || null
