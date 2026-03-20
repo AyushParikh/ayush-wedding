@@ -115,16 +115,23 @@
       showScreen('screen-lookup');
     }
 
+    let toastTimer = null;
     function showError(id, msg) {
-      const el = document.getElementById(id);
-      el.textContent = msg;
-      el.classList.add('visible');
+      let toast = document.getElementById('toast-popup');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-popup';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.classList.add('visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('visible'), 4000);
     }
 
     function hideError(id) {
-      const el = document.getElementById(id);
-      el.textContent = '';
-      el.classList.remove('visible');
+      const toast = document.getElementById('toast-popup');
+      if (toast) toast.classList.remove('visible');
     }
 
     function setLoading(btnId, loading) {

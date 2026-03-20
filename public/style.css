@@ -78,7 +78,7 @@ body::before {
 .layout-panel {
   flex: 0 0 45%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   overflow-y: auto;
   background:
@@ -105,6 +105,7 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 1.4rem;
+  margin: auto;
 }
 
 /* ── Couple heading ──────────────────────────────────────── */
@@ -326,18 +327,32 @@ input[type="text"]:focus {
 .btn-ghost:hover { color: var(--gold); border-color: var(--gold); }
 
 /* ── Error ───────────────────────────────────────────────── */
-.error-msg {
-  background: rgba(196,144,138,0.08);
-  border-left: 2px solid var(--rose);
-  padding: 0.75rem 1rem;
-  font-size: 0.8rem;
+.error-msg { display: none; }
+
+#toast-popup {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-0.75rem);
+  background: #2a1a1a;
+  border: 1px solid var(--rose);
   color: var(--rose);
-  margin-bottom: 1.1rem;
-  border-radius: 0 1px 1px 0;
-  display: none;
+  padding: 0.85rem 1.4rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
   line-height: 1.5;
+  text-align: center;
+  max-width: min(90vw, 360px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 10000;
 }
-.error-msg.visible { display: block; }
+#toast-popup.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
 
 /* ── Guest greeting ──────────────────────────────────────── */
 .guest-greeting {
