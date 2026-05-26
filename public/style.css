@@ -245,8 +245,17 @@ body::before {
   font-size: 0.78rem;
   color: var(--muted);
   line-height: 1.7;
-  margin-bottom: 1.3rem;
+  margin-bottom: 0.5rem;
   letter-spacing: 0.01em;
+}
+
+.rsvp-deadline {
+  font-size: 0.72rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 1.3rem;
+  font-weight: 600;
 }
 
 /* ── Form ────────────────────────────────────────────────── */
